@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruleta de Rutas de Senderismo en Cantabria (aptas para niños)</title>
+<style>
+  :root {
+    --bg1: #0f3d2e;
+    --bg2: #1b6b4a;
+    --gold: #f4c542;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at 50% 0%, var(--bg2), var(--bg1));
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+  }
+  h1 {
+    text-align: center;
+    font-size: clamp(1.3rem, 4vw, 2.2rem);
+    margin: 0 0 4px;
+    text-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  .sub {
+    opacity: .8;
+    font-size: .95rem;
+    margin-bottom: 22px;
+    text-align: center;
+  }
+  .wheel-wrap {
+    position: relative;
+    width: min(86vw, 560px);
+    height: min(86vw, 560px);
+  }
+  /* Puntero */
+  .pointer {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 22px solid transparent;
+    border-right: 22px solid transparent;
+    border-top: 40px solid var(--gold);
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,.5));
+    z-index: 5;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 0 0 10px rgba(255,255,255,.08),
+                0 0 0 18px rgba(0,0,0,.25),
+                0 18px 50px rgba(0,0,0,.45);
+    transition: transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+  }
+  /* Botón central */
+  #spin {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 92px; height: 92px;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    background: var(--gold);
+    color: #0f3d2e;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    z-index: 6;
+    box-shadow: 0 6px 18px rgba(0,0,0,.4);
+    transition: transform .12s ease, filter .12s ease;
+  }
+  #spin:hover { filter: brightness(1.08); }
+  #spin:active { transform: translate(-50%, -50%) scale(.94); }
+  #spin:disabled { cursor: not-allowed; filter: grayscale(.4) brightness(.9); }
+
+  .result {
+    margin-top: 30px;
+    min-height: 64px;
+    text-align: center;
+    max-width: 640px;
+  }
+  .result .label { font-size: .85rem; opacity: .7; letter-spacing: .1em; text-transform: uppercase; }
+  .result .name {
+    font-size: clamp(1.4rem, 5vw, 2.4rem);
+    font-weight: 800;
+    color: var(--gold);
+    margin-top: 4px;
+    text-shadow: 0 2px 10px rgba(0,0,0,.5);
+  }
+  .result .meta { margin-top: 8px; opacity: .9; font-size: 1rem; }
+
+  details {
+    margin-top: 34px;
+    max-width: 720px;
+    width: 100%;
+    background: rgba(0,0,0,.2);
+    border-radius: 12px;
+    padding: 14px 18px;
+  }
+  summary { cursor: pointer; font-weight: 600; }
+  ul { columns: 2; column-gap: 28px; padding-left: 18px; }
+  @media (max-width: 560px) { ul { columns: 1; } }
+  li { margin: 4px 0; font-size: .92rem; }
+  li b { color: var(--gold); }
+</style>
+</head>
+<body>
+  <h1>🥾 Ruleta de Rutas de Cantabria</h1>
+  <div class="sub">Senderos fáciles y aptos para ir con niños · ¡Gira y a caminar!</div>
+
+  <div class="wheel-wrap">
+    <div class="pointer"></div>
+    <canvas id="wheel" width="700" height="700"></canvas>
+    <button id="spin">GIRAR</button>
+  </div>
+
+  <div class="result">
+    <div class="label">Vuestra ruta de hoy</div>
+    <div class="name" id="resultName">—</div>
+    <div class="meta" id="resultMeta"></div>
+  </div>
+
+  <details>
+    <summary>Ver todas las rutas (con zona y dificultad)</summary>
+    <ul id="listEl"></ul>
+  </details>
+
+<script>
+const rutas = [
+  // --- Originales ---
+  { name: "Bosque de Secuoyas de Cabezón de la Sal", zona: "Monte Cabezón", info: "Bosque mágico, casi llano, 30–40 min. Ideal para peques." },
+  { name: "Dunas de Liencres", zona: "Liencres", info: "Pinar y dunas junto al mar, senderos cortos y planos." },
+  { name: "Faro de Cabo Mayor", zona: "Santander", info: "Paseo costero asfaltado con vistas, apto carrito." },
+  { name: "Nacimiento del Río Asón", zona: "Soba", info: "Cascada espectacular; mirador a pocos minutos del aparcamiento." },
+  { name: "Ría de San Vicente de la Barquera", zona: "San Vicente", info: "Paseo llano junto a la ría con vistas a Picos de Europa." },
+  { name: "Molinos del Río Aguanaz", zona: "Entrambasaguas", info: "Sendero fácil junto al río y manantial, sombra y agua." },
+  { name: "Fuente Dé y praderas de Áliva", zona: "Picos de Europa", info: "Teleférico + paseos suaves arriba; alta montaña sin esfuerzo." },
+  { name: "Pozo Tremeo y Saja", zona: "Reserva del Saja", info: "Bosque de robles y hayas, sendero tranquilo y umbrío." },
+  { name: "Playa y senda de Oyambre", zona: "Comillas", info: "Praderas costeras llanas, dunas y vistas al mar." },
+  { name: "Cabárceno (senderos del parque)", zona: "Penagos", info: "Animales + caminos asfaltados; jornada redonda con niños." },
+  { name: "Mirador de Santa Catalina (Soplao)", zona: "Rionansa", info: "Paseo corto al mirador y entorno de la cueva." },
+  { name: "Ruta de las Caras / Embalse del Ebro", zona: "Campoo", info: "Orillas del embalse, terreno llano y abierto." },
+  { name: "Pico Castillo desde Liérganes", zona: "Liérganes", info: "Subida corta y suave con miradores sobre el pueblo." },
+  { name: "Cascada del Bolao (Cóbreces)", zona: "Alfoz de Lloredo", info: "Cascada que cae al mar; paseo muy corto desde el coche." },
+  { name: "Sendero del Río Gándara", zona: "Soba", info: "Ruta junto al río con pozas, fácil y refrescante en verano." },
+  { name: "Marismas de Santoña (observatorio)", zona: "Santoña", info: "Pasarelas llanas para ver aves; ideal con prismáticos." },
+  { name: "Monte Buciero – Faro del Caballo", zona: "Santoña", info: "Versión corta hasta los miradores (las escaleras finales, opcionales)." },
+  { name: "Costa Quebrada – Urros de Liencres", zona: "Piélagos", info: "Acantilados y formaciones rocosas, sendas cortas señalizadas." },
+  { name: "Playa de Langre y su mirador", zona: "Ribamontán al Mar", info: "Paseo por lo alto del acantilado, vistas y arena dorada." },
+  { name: "Lagos de la zona de Brañavieja", zona: "Alto Campoo", info: "Entorno de montaña suave, praderas y aire puro." },
+  { name: "Bárcena Mayor (pueblo y río)", zona: "Los Tojos", info: "Pueblo más bonito + paseo llano junto al río Argoza." },
+  { name: "Sendero de los Molinos de Liérganes", zona: "Liérganes", info: "Ruta circular fácil entre prados, río y casonas." },
+  { name: "Cueva de El Pendo (entorno)", zona: "Escobedo", info: "Paseo corto a una cueva con arte rupestre." },
+  { name: "Mirador de la Cardosa", zona: "Saja-Nansa", info: "Acceso fácil a un balcón sobre los valles del Nansa." },
+
+  // --- De cantabriaconninos.com ---
+  { name: "Senda fluvial del río Pisueña", zona: "Castañeda (Valles Pasiegos)", info: "Llana junto al río, con tirolina y parque infantil cubierto." },
+  { name: "Paseo Fluvial de las Escubias de Barcenaciones", zona: "Reocín (Costa Occidental)", info: "Llana junto al Saja, casonas y figuras mitológicas." },
+  { name: "Calzada Romana del Monte Fresneda", zona: "Besaya", info: "Recorrido histórico por un tesoro romano oculto." },
+  { name: "El Castillo de Montehano", zona: "Escalante (Trasmiera)", info: "Pequeña cumbre entre marismas con ruinas de castillo." },
+  { name: "Senda Fluvial del Río Besaya", zona: "Somahoz a Cieza (Besaya)", info: "Sendero pintoresco siguiendo el curso del río." },
+  { name: "El Castillo de Vispieres", zona: "Santillana del Mar", info: "Castillo en la costa occidental, paseo corto." },
+  { name: "Ruta Mitológica del Monte Tejas", zona: "San Felices de Buelna (Besaya)", info: "Sendero temático de mitología cántabra." },
+  { name: "El Callejón de los Lobos", zona: "Saja-Nansa", info: "Ruta sobre la historia de humanos y lobos." },
+  { name: "Vía Verde del Piquillo", zona: "Ontón (Costa Oriental)", info: "Vía verde fácil sobre antigua línea de tren." },
+  { name: "El sendero de los porqués", zona: "Camargo", info: "Sendero educativo sobre la evolución del paisaje." },
+  { name: "Mirador del Monte Cincho", zona: "Arnuero (Trasmiera)", info: "Subida fácil a un mirador, una de las rutas sencillas." },
+  { name: "Ruta Accesible por la Ría de Limpias", zona: "Limpias (Asón-Agüera)", info: "Paseo accesible junto a la ría, apto carrito/silla." },
+  { name: "El Castillo del Collado", zona: "Escalante", info: "Pequeña ruta a un enclave de la Cantabria inusual." },
+  { name: "Ruta al Refugio Número 6", zona: "Gibaja (Asón-Agüera)", info: "Hasta un pueblo precioso a orillas del Asón." },
+  { name: "Acantilados de Tagle y Torre de San Telmo", zona: "Suances–Santillana", info: "Acantilados costeros con vistas e historia." },
+  { name: "Vía Verde del Pas", zona: "Valles Pasiegos", info: "Accesible y llana, ideal con granjas por el camino." },
+  { name: "Ruta Accesible de Ramales de la Victoria", zona: "Ramales (Asón-Agüera)", info: "Paseo corto, sencillo y accesible." },
+  { name: "Ruta del Arroyo Troncos", zona: "Polientes (Valderredible)", info: "Sendero en el municipio más al sur de Cantabria." },
+  { name: "La Canal de las Tejeras", zona: "Besaya", info: "Senda fluvial poco conocida, muy fácil. ¡La de ayer!" },
+  { name: "Costa Quebrada por Cuchía", zona: "Miengo", info: "Etapa costera del parque geológico Costa Quebrada." },
+  { name: "Senda de Peñas Negras al Alto de la Gigüela", zona: "Maoño (Santander)", info: "Muy sencilla, con vistas desde el mirador." },
+  { name: "La Picota de Liencres", zona: "Liencres", info: "Ascensión mítica pero muy corta, con grandes vistas." },
+  { name: "Minas de Udías (Vía Verde de Pelurgo)", zona: "Costa Occidental", info: "Vía verde muy querida por los cántabros." },
+  { name: "Los Pozos de Valcaba", zona: "Pámanes (Trasmiera)", info: "Recorrido acuático fácil junto a pozas." },
+  { name: "Las Cascadas de Lamiña", zona: "Saja-Nansa", info: "Clásico cántabro, ruta muy sencilla y segura." },
+  { name: "Ruta a Porcieda (pueblo abandonado)", zona: "Liébana", info: "Excursión a un núcleo histórico en desuso." },
+  { name: "Los Pozos de Noja", zona: "Miera–Liérganes", info: "Dos lagunas entre prados, paseo tranquilo." },
+  { name: "Ruta de la Llasca de los Moros", zona: "Besaya", info: "Paseo muy agradable para hacer con niños." },
+  { name: "Centro Geográfico de Cantabria", zona: "Anievas (Besaya)", info: "Visita curiosa al corazón geográfico de la región." },
+  { name: "La Casa del Monte de Ucieda", zona: "Saja-Nansa", info: "Día inolvidable en plena reserva natural." },
+  { name: "El Churrón de Borleña", zona: "Valles Pasiegos", info: "Cascada; 'la ruta para niños más bonita de Cantabria'." },
+  { name: "Cueva de Cucabrera en Galizano", zona: "Ribamontán al Mar", info: "Exploración de cueva apta para familias." },
+  { name: "Senda Mitológica del Monte Hozarco", zona: "Peñarrubia (Liébana)", info: "Sendero temático con mirador de Santa Catalina." },
+  { name: "Cueva del Canónigo en Rucandio", zona: "Trasmiera", info: "Cueva 'la mejor para visitar con niños'." },
+  { name: "Río Saja: senda fluvial desde Carrejo", zona: "Cabezón de la Sal", info: "Paseo llano y bonito junto al río Saja." },
+  { name: "La joya escondida del río Saja (El Camarao)", zona: "Puente San Miguel", info: "Paseo corto al parque junto al río." },
+  { name: "La Fuente del Francés de Hoznayo", zona: "Entrambasaguas", info: "Entorno histórico con accesibilidad." },
+  { name: "Ruta a la Virgen de las Nieves", zona: "Asón-Agüera", info: "Escapada fácil, grande y segura, probada con peques." }
+];
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const size = canvas.width;
+const R = size / 2;
+const n = rutas.length;
+const arc = (2 * Math.PI) / n;
+const colors = ["#1b6b4a", "#238a5e", "#2f9e6e", "#0f5d3f", "#3aaf7c", "#157a52"];
+
+function drawWheel() {
+  ctx.clearRect(0, 0, size, size);
+  for (let i = 0; i < n; i++) {
+    const start = i * arc - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(R, R);
+    ctx.arc(R, R, R - 6, start, start + arc);
+    ctx.closePath();
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,.15)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // texto
+    ctx.save();
+    ctx.translate(R, R);
+    ctx.rotate(start + arc / 2);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#fff";
+    ctx.font = `bold ${Math.max(9, Math.min(15, 360 / n))}px "Segoe UI", sans-serif`;
+    let label = rutas[i].name;
+    const maxChars = n > 40 ? 24 : 34;
+    if (label.length > maxChars) label = label.slice(0, maxChars - 1) + "…";
+    ctx.fillText(label, R - 18, 4);
+    ctx.restore();
+  }
+}
+drawWheel();
+
+// lista completa
+const listEl = document.getElementById("listEl");
+rutas.forEach(r => {
+  const li = document.createElement("li");
+  li.innerHTML = `<b>${r.name}</b> — ${r.zona}. ${r.info}`;
+  listEl.appendChild(li);
+});
+
+const spinBtn = document.getElementById("spin");
+const resultName = document.getElementById("resultName");
+const resultMeta = document.getElementById("resultMeta");
+let currentRot = 0;
+let spinning = false;
+
+spinBtn.addEventListener("click", () => {
+  if (spinning) return;
+  spinning = true;
+  spinBtn.disabled = true;
+  resultName.textContent = "…";
+  resultMeta.textContent = "";
+
+  const idx = Math.floor(Math.random() * n);
+  const extraTurns = 5 + Math.floor(Math.random() * 4); // 5–8 vueltas
+  // ángulo para que el centro del sector idx quede arriba (bajo el puntero)
+  const targetAngle = 360 * extraTurns + (360 - (idx * (360 / n) + (360 / n) / 2));
+  currentRot += targetAngle;
+  canvas.style.transform = `rotate(${currentRot}deg)`;
+
+  setTimeout(() => {
+    const r = rutas[idx];
+    resultName.textContent = r.name;
+    resultMeta.textContent = `📍 ${r.zona} · ${r.info}`;
+    spinning = false;
+    spinBtn.disabled = false;
+  }, 6100);
+});
+</script>
+</body>
+</html>
