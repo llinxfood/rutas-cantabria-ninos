@@ -96,7 +96,28 @@
     margin-top: 4px;
     text-shadow: 0 2px 10px rgba(0,0,0,.5);
   }
-  .result .meta { margin-top: 8px; opacity: .9; font-size: 1rem; }
+  .result .stats {
+    margin-top: 10px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  .result .stats span {
+    background: rgba(255,255,255,.12); border-radius: 999px;
+    padding: 4px 12px; font-size: .9rem; font-weight: 600;
+  }
+  .result .meta { margin-top: 10px; opacity: .9; font-size: 1rem; line-height: 1.4; }
+  .actions { margin-top: 16px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .actions[hidden] { display: none; }
+  .btn-map {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gold); color: #0f3d2e;
+    font-weight: 700; font-size: .95rem;
+    padding: 10px 18px; border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,.35);
+    transition: transform .12s ease, filter .12s ease;
+  }
+  .btn-map:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-map.secondary { background: rgba(255,255,255,.14); color: #fff; }
+  .btn-map.wikiloc { background: #ff6a00; color: #fff; }
 
   details {
     margin-top: 34px;
@@ -107,6 +128,22 @@
     padding: 14px 18px;
   }
   summary { cursor: pointer; font-weight: 600; }
+  .note { font-size: .82rem; opacity: .7; margin: 10px 0 4px; line-height: 1.4; }
+  .filters {
+    display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0;
+  }
+  .filters input, .filters select, .filters .reset {
+    background: rgba(255,255,255,.1); color: #fff;
+    border: 1px solid rgba(255,255,255,.18); border-radius: 8px;
+    padding: 8px 12px; font-size: .9rem; font-family: inherit;
+  }
+  .filters input { flex: 1 1 180px; }
+  .filters select { cursor: pointer; }
+  .filters select option { background: #14543a; color: #fff; }
+  .filters .reset { cursor: pointer; font-weight: 600; }
+  .filters .reset:hover { background: rgba(255,255,255,.2); }
+  .count { font-size: .85rem; opacity: .75; margin-bottom: 10px; }
+  .empty { opacity: .7; font-style: italic; padding: 8px 0; }
   ul { columns: 2; column-gap: 28px; padding-left: 18px; }
   @media (max-width: 560px) { ul { columns: 1; } }
   li { margin: 4px 0; font-size: .92rem; }
@@ -126,81 +163,110 @@
   <div class="result">
     <div class="label">Vuestra ruta de hoy</div>
     <div class="name" id="resultName">—</div>
+    <div class="stats" id="resultStats"></div>
     <div class="meta" id="resultMeta"></div>
+    <div class="actions" id="resultActions" hidden>
+      <a class="btn-map" id="dirLink" href="#" target="_blank" rel="noopener">🚗 Cómo llegar en coche</a>
+      <a class="btn-map wikiloc" id="trackLink" href="#" target="_blank" rel="noopener">📍 Track en Wikiloc</a>
+    </div>
   </div>
 
-  <details>
-    <summary>Ver todas las rutas (con zona y dificultad)</summary>
+  <details open>
+    <summary>Explorar todas las rutas</summary>
+    <p class="note">📏 Distancia, ⛰️ desnivel y tipo son <b>orientativos</b>. El dato exacto, el track GPS, fotos y reseñas están en el enlace de Wikiloc de cada ruta.</p>
+    <div class="filters">
+      <input type="search" id="fSearch" placeholder="🔎 Buscar ruta o zona…">
+      <select id="fTipo">
+        <option value="">Tipo: todas</option>
+        <option value="Circular">🔄 Circular</option>
+        <option value="Lineal">↔️ Lineal</option>
+      </select>
+      <select id="fDist">
+        <option value="">Distancia: cualquiera</option>
+        <option value="s">Hasta 3 km</option>
+        <option value="m">3 – 5 km</option>
+        <option value="l">Más de 5 km</option>
+      </select>
+      <select id="fDesn">
+        <option value="">Desnivel: cualquiera</option>
+        <option value="s">Llano (≤ 50 m)</option>
+        <option value="m">Suave (50 – 150 m)</option>
+        <option value="l">Más exigente (> 150 m)</option>
+      </select>
+      <button type="button" id="fReset" class="reset">Limpiar</button>
+    </div>
+    <div class="count" id="fCount"></div>
     <ul id="listEl"></ul>
   </details>
 
 <script>
+// km, desnivel y tipo son ORIENTATIVOS (aprox.). El dato exacto está en el track de Wikiloc.
 const rutas = [
   // --- Originales ---
-  { name: "Bosque de Secuoyas de Cabezón de la Sal", zona: "Monte Cabezón", info: "Bosque mágico, casi llano, 30–40 min. Ideal para peques." },
-  { name: "Dunas de Liencres", zona: "Liencres", info: "Pinar y dunas junto al mar, senderos cortos y planos." },
-  { name: "Faro de Cabo Mayor", zona: "Santander", info: "Paseo costero asfaltado con vistas, apto carrito." },
-  { name: "Nacimiento del Río Asón", zona: "Soba", info: "Cascada espectacular; mirador a pocos minutos del aparcamiento." },
-  { name: "Ría de San Vicente de la Barquera", zona: "San Vicente", info: "Paseo llano junto a la ría con vistas a Picos de Europa." },
-  { name: "Molinos del Río Aguanaz", zona: "Entrambasaguas", info: "Sendero fácil junto al río y manantial, sombra y agua." },
-  { name: "Fuente Dé y praderas de Áliva", zona: "Picos de Europa", info: "Teleférico + paseos suaves arriba; alta montaña sin esfuerzo." },
-  { name: "Pozo Tremeo y Saja", zona: "Reserva del Saja", info: "Bosque de robles y hayas, sendero tranquilo y umbrío." },
-  { name: "Playa y senda de Oyambre", zona: "Comillas", info: "Praderas costeras llanas, dunas y vistas al mar." },
-  { name: "Cabárceno (senderos del parque)", zona: "Penagos", info: "Animales + caminos asfaltados; jornada redonda con niños." },
-  { name: "Mirador de Santa Catalina (Soplao)", zona: "Rionansa", info: "Paseo corto al mirador y entorno de la cueva." },
-  { name: "Ruta de las Caras / Embalse del Ebro", zona: "Campoo", info: "Orillas del embalse, terreno llano y abierto." },
-  { name: "Pico Castillo desde Liérganes", zona: "Liérganes", info: "Subida corta y suave con miradores sobre el pueblo." },
-  { name: "Cascada del Bolao (Cóbreces)", zona: "Alfoz de Lloredo", info: "Cascada que cae al mar; paseo muy corto desde el coche." },
-  { name: "Sendero del Río Gándara", zona: "Soba", info: "Ruta junto al río con pozas, fácil y refrescante en verano." },
-  { name: "Marismas de Santoña (observatorio)", zona: "Santoña", info: "Pasarelas llanas para ver aves; ideal con prismáticos." },
-  { name: "Monte Buciero – Faro del Caballo", zona: "Santoña", info: "Versión corta hasta los miradores (las escaleras finales, opcionales)." },
-  { name: "Costa Quebrada – Urros de Liencres", zona: "Piélagos", info: "Acantilados y formaciones rocosas, sendas cortas señalizadas." },
-  { name: "Playa de Langre y su mirador", zona: "Ribamontán al Mar", info: "Paseo por lo alto del acantilado, vistas y arena dorada." },
-  { name: "Lagos de la zona de Brañavieja", zona: "Alto Campoo", info: "Entorno de montaña suave, praderas y aire puro." },
-  { name: "Bárcena Mayor (pueblo y río)", zona: "Los Tojos", info: "Pueblo más bonito + paseo llano junto al río Argoza." },
-  { name: "Sendero de los Molinos de Liérganes", zona: "Liérganes", info: "Ruta circular fácil entre prados, río y casonas." },
-  { name: "Cueva de El Pendo (entorno)", zona: "Escobedo", info: "Paseo corto a una cueva con arte rupestre." },
-  { name: "Mirador de la Cardosa", zona: "Saja-Nansa", info: "Acceso fácil a un balcón sobre los valles del Nansa." },
+  { name: "Bosque de Secuoyas de Cabezón de la Sal", zona: "Monte Cabezón", km: 1.5, desnivel: 30, tipo: "Circular", resumen: "Bosque mágico de secuoyas gigantes, casi llano, 30–40 min. Perfecto para los más peques." },
+  { name: "Dunas de Liencres", zona: "Liencres", km: 3, desnivel: 40, tipo: "Circular", resumen: "Pinar y dunas junto al mar con senderos cortos y planos. Termina en playa." },
+  { name: "Faro de Cabo Mayor", zona: "Santander", km: 2, desnivel: 20, tipo: "Lineal", resumen: "Paseo costero asfaltado con grandes vistas al mar. Apto para carrito." },
+  { name: "Nacimiento del Río Asón", zona: "Soba", km: 1, desnivel: 50, tipo: "Lineal", resumen: "Cascada espectacular ('cola de caballo'); mirador a pocos minutos del aparcamiento." },
+  { name: "Ría de San Vicente de la Barquera", zona: "San Vicente", km: 4, desnivel: 20, tipo: "Lineal", resumen: "Paseo llano junto a la ría con vistas a los Picos de Europa." },
+  { name: "Molinos del Río Aguanaz", zona: "Entrambasaguas", km: 3, desnivel: 40, tipo: "Circular", resumen: "Sendero fácil junto al río y su manantial, con sombra y agua todo el camino." },
+  { name: "Fuente Dé y praderas de Áliva", zona: "Picos de Europa", km: 6, desnivel: 150, tipo: "Lineal", resumen: "Teleférico + paseos suaves arriba; alta montaña sin apenas esfuerzo." },
+  { name: "Pozo Tremeo y Saja", zona: "Reserva del Saja", km: 5, desnivel: 120, tipo: "Circular", resumen: "Bosque de robles y hayas, sendero tranquilo y umbrío junto al río." },
+  { name: "Playa y senda de Oyambre", zona: "Comillas", km: 4, desnivel: 30, tipo: "Lineal", resumen: "Praderas costeras llanas, dunas y vistas al mar abierto." },
+  { name: "Cabárceno (senderos del parque)", zona: "Penagos", km: 5, desnivel: 100, tipo: "Circular", resumen: "Animales en semilibertad + caminos asfaltados; jornada redonda con niños." },
+  { name: "Mirador de Santa Catalina (Soplao)", zona: "Rionansa", km: 1, desnivel: 40, tipo: "Lineal", resumen: "Paseo corto al mirador y al entorno de la cueva de El Soplao." },
+  { name: "Embalse del Ebro (presa y orillas)", zona: "Campoo", km: 5, desnivel: 50, tipo: "Circular", resumen: "Orillas del embalse en terreno llano y abierto, ideal para corretear." },
+  { name: "Pico Castillo desde Liérganes", zona: "Liérganes", km: 4, desnivel: 200, tipo: "Circular", resumen: "Subida corta y suave con miradores sobre el bonito pueblo de Liérganes." },
+  { name: "Cascada del Bolao (Cóbreces)", zona: "Alfoz de Lloredo", km: 1, desnivel: 30, tipo: "Lineal", resumen: "Cascada que cae directa al mar; paseo muy corto desde el coche." },
+  { name: "Sendero del Río Gándara", zona: "Soba", km: 5, desnivel: 100, tipo: "Lineal", resumen: "Ruta junto al río con pozas, fácil y refrescante en verano." },
+  { name: "Marismas de Santoña (observatorio)", zona: "Santoña", km: 3, desnivel: 10, tipo: "Lineal", resumen: "Pasarelas llanas para ver aves; ideal con prismáticos. Apto carrito." },
+  { name: "Monte Buciero – Faro del Caballo", zona: "Santoña", km: 6, desnivel: 250, tipo: "Lineal", resumen: "Versión corta hasta los miradores (las 700 escaleras finales son opcionales)." },
+  { name: "Costa Quebrada – Urros de Liencres", zona: "Piélagos", km: 4, desnivel: 60, tipo: "Circular", resumen: "Acantilados y formaciones rocosas espectaculares, sendas cortas señalizadas." },
+  { name: "Playa de Langre y su mirador", zona: "Ribamontán al Mar", km: 2, desnivel: 30, tipo: "Lineal", resumen: "Paseo por lo alto del acantilado, vistas y bajada a arena dorada." },
+  { name: "Lagos de la zona de Brañavieja", zona: "Alto Campoo", km: 4, desnivel: 150, tipo: "Circular", resumen: "Entorno de montaña suave, praderas y aire puro de altura." },
+  { name: "Bárcena Mayor (pueblo y río)", zona: "Los Tojos", km: 4, desnivel: 80, tipo: "Circular", resumen: "Uno de los pueblos más bonitos de España + paseo llano junto al río Argoza." },
+  { name: "Sendero de los Molinos de Liérganes", zona: "Liérganes", km: 5, desnivel: 100, tipo: "Circular", resumen: "Ruta circular fácil entre prados, río y casonas montañesas." },
+  { name: "Cueva de El Pendo (entorno)", zona: "Escobedo", km: 2, desnivel: 50, tipo: "Lineal", resumen: "Paseo corto a una cueva con arte rupestre Patrimonio de la Humanidad." },
+  { name: "Mirador de la Cardosa", zona: "Saja-Nansa", km: 1, desnivel: 30, tipo: "Lineal", resumen: "Acceso fácil a un balcón con vistas sobre los valles del Nansa." },
 
   // --- De cantabriaconninos.com ---
-  { name: "Senda fluvial del río Pisueña", zona: "Castañeda (Valles Pasiegos)", info: "Llana junto al río, con tirolina y parque infantil cubierto." },
-  { name: "Paseo Fluvial de las Escubias de Barcenaciones", zona: "Reocín (Costa Occidental)", info: "Llana junto al Saja, casonas y figuras mitológicas." },
-  { name: "Calzada Romana del Monte Fresneda", zona: "Besaya", info: "Recorrido histórico por un tesoro romano oculto." },
-  { name: "El Castillo de Montehano", zona: "Escalante (Trasmiera)", info: "Pequeña cumbre entre marismas con ruinas de castillo." },
-  { name: "Senda Fluvial del Río Besaya", zona: "Somahoz a Cieza (Besaya)", info: "Sendero pintoresco siguiendo el curso del río." },
-  { name: "El Castillo de Vispieres", zona: "Santillana del Mar", info: "Castillo en la costa occidental, paseo corto." },
-  { name: "Ruta Mitológica del Monte Tejas", zona: "San Felices de Buelna (Besaya)", info: "Sendero temático de mitología cántabra." },
-  { name: "El Callejón de los Lobos", zona: "Saja-Nansa", info: "Ruta sobre la historia de humanos y lobos." },
-  { name: "Vía Verde del Piquillo", zona: "Ontón (Costa Oriental)", info: "Vía verde fácil sobre antigua línea de tren." },
-  { name: "El sendero de los porqués", zona: "Camargo", info: "Sendero educativo sobre la evolución del paisaje." },
-  { name: "Mirador del Monte Cincho", zona: "Arnuero (Trasmiera)", info: "Subida fácil a un mirador, una de las rutas sencillas." },
-  { name: "Ruta Accesible por la Ría de Limpias", zona: "Limpias (Asón-Agüera)", info: "Paseo accesible junto a la ría, apto carrito/silla." },
-  { name: "El Castillo del Collado", zona: "Escalante", info: "Pequeña ruta a un enclave de la Cantabria inusual." },
-  { name: "Ruta al Refugio Número 6", zona: "Gibaja (Asón-Agüera)", info: "Hasta un pueblo precioso a orillas del Asón." },
-  { name: "Acantilados de Tagle y Torre de San Telmo", zona: "Suances–Santillana", info: "Acantilados costeros con vistas e historia." },
-  { name: "Vía Verde del Pas", zona: "Valles Pasiegos", info: "Accesible y llana, ideal con granjas por el camino." },
-  { name: "Ruta Accesible de Ramales de la Victoria", zona: "Ramales (Asón-Agüera)", info: "Paseo corto, sencillo y accesible." },
-  { name: "Ruta del Arroyo Troncos", zona: "Polientes (Valderredible)", info: "Sendero en el municipio más al sur de Cantabria." },
-  { name: "La Canal de las Tejeras", zona: "Besaya", info: "Senda fluvial poco conocida, muy fácil. ¡La de ayer!" },
-  { name: "Costa Quebrada por Cuchía", zona: "Miengo", info: "Etapa costera del parque geológico Costa Quebrada." },
-  { name: "Senda de Peñas Negras al Alto de la Gigüela", zona: "Maoño (Santander)", info: "Muy sencilla, con vistas desde el mirador." },
-  { name: "La Picota de Liencres", zona: "Liencres", info: "Ascensión mítica pero muy corta, con grandes vistas." },
-  { name: "Minas de Udías (Vía Verde de Pelurgo)", zona: "Costa Occidental", info: "Vía verde muy querida por los cántabros." },
-  { name: "Los Pozos de Valcaba", zona: "Pámanes (Trasmiera)", info: "Recorrido acuático fácil junto a pozas." },
-  { name: "Las Cascadas de Lamiña", zona: "Saja-Nansa", info: "Clásico cántabro, ruta muy sencilla y segura." },
-  { name: "Ruta a Porcieda (pueblo abandonado)", zona: "Liébana", info: "Excursión a un núcleo histórico en desuso." },
-  { name: "Los Pozos de Noja", zona: "Miera–Liérganes", info: "Dos lagunas entre prados, paseo tranquilo." },
-  { name: "Ruta de la Llasca de los Moros", zona: "Besaya", info: "Paseo muy agradable para hacer con niños." },
-  { name: "Centro Geográfico de Cantabria", zona: "Anievas (Besaya)", info: "Visita curiosa al corazón geográfico de la región." },
-  { name: "La Casa del Monte de Ucieda", zona: "Saja-Nansa", info: "Día inolvidable en plena reserva natural." },
-  { name: "El Churrón de Borleña", zona: "Valles Pasiegos", info: "Cascada; 'la ruta para niños más bonita de Cantabria'." },
-  { name: "Cueva de Cucabrera en Galizano", zona: "Ribamontán al Mar", info: "Exploración de cueva apta para familias." },
-  { name: "Senda Mitológica del Monte Hozarco", zona: "Peñarrubia (Liébana)", info: "Sendero temático con mirador de Santa Catalina." },
-  { name: "Cueva del Canónigo en Rucandio", zona: "Trasmiera", info: "Cueva 'la mejor para visitar con niños'." },
-  { name: "Río Saja: senda fluvial desde Carrejo", zona: "Cabezón de la Sal", info: "Paseo llano y bonito junto al río Saja." },
-  { name: "La joya escondida del río Saja (El Camarao)", zona: "Puente San Miguel", info: "Paseo corto al parque junto al río." },
-  { name: "La Fuente del Francés de Hoznayo", zona: "Entrambasaguas", info: "Entorno histórico con accesibilidad." },
-  { name: "Ruta a la Virgen de las Nieves", zona: "Asón-Agüera", info: "Escapada fácil, grande y segura, probada con peques." }
+  { name: "Senda fluvial del río Pisueña", zona: "Castañeda (Valles Pasiegos)", km: 5, desnivel: 30, tipo: "Lineal", resumen: "Llana junto al río, con tirolina y parque infantil cubierto por el camino." },
+  { name: "Paseo Fluvial de las Escubias de Barcenaciones", zona: "Reocín (Costa Occidental)", km: 3, desnivel: 20, tipo: "Circular", resumen: "Llana junto al Saja, con casonas y figuras mitológicas ('Territorio Escubías')." },
+  { name: "Calzada Romana del Monte Fresneda", zona: "Besaya", km: 6, desnivel: 200, tipo: "Circular", resumen: "Recorrido histórico por una calzada romana oculta entre bosque." },
+  { name: "El Castillo de Montehano", zona: "Escalante (Trasmiera)", km: 4, desnivel: 120, tipo: "Circular", resumen: "Pequeña cumbre entre marismas con ruinas de castillo y convento." },
+  { name: "Senda Fluvial del Río Besaya", zona: "Somahoz a Cieza (Besaya)", km: 6, desnivel: 40, tipo: "Lineal", resumen: "Sendero pintoresco siguiendo el curso del río por su margen izquierda." },
+  { name: "El Castillo de Vispieres", zona: "Santillana del Mar", km: 3, desnivel: 80, tipo: "Circular", resumen: "Paseo corto a una torre medieval junto a Santillana del Mar." },
+  { name: "Ruta Mitológica del Monte Tejas", zona: "San Felices de Buelna (Besaya)", km: 5, desnivel: 200, tipo: "Circular", resumen: "Sendero temático con figuras de la mitología cántabra; engancha a los niños." },
+  { name: "El Callejón de los Lobos", zona: "Saja-Nansa", km: 4, desnivel: 150, tipo: "Circular", resumen: "Ruta sobre la antigua relación entre humanos y lobos, con trampa lobera." },
+  { name: "Vía Verde del Piquillo", zona: "Ontón (Costa Oriental)", km: 5, desnivel: 50, tipo: "Lineal", resumen: "Vía verde fácil sobre una antigua línea de tren minero. Apto carrito." },
+  { name: "El sendero de los porqués", zona: "Camargo", km: 3, desnivel: 40, tipo: "Lineal", resumen: "Sendero educativo que explica la evolución del paisaje cántabro." },
+  { name: "Mirador del Monte Cincho", zona: "Arnuero (Trasmiera)", km: 3, desnivel: 120, tipo: "Circular", resumen: "Subida fácil a un mirador, una de las rutas más sencillas de Trasmiera." },
+  { name: "Ruta Accesible por la Ría de Limpias", zona: "Limpias (Asón-Agüera)", km: 3, desnivel: 10, tipo: "Lineal", resumen: "Paseo accesible junto a la ría. Apto para carrito y silla de ruedas." },
+  { name: "El Castillo del Collado", zona: "Escalante", km: 3, desnivel: 100, tipo: "Circular", resumen: "Pequeña ruta a un enclave curioso de la Cantabria menos conocida." },
+  { name: "Ruta al Refugio Número 6", zona: "Gibaja (Asón-Agüera)", km: 5, desnivel: 100, tipo: "Lineal", resumen: "Camino hasta un pueblo precioso a orillas del río Asón." },
+  { name: "Acantilados de Tagle y Torre de San Telmo", zona: "Suances–Santillana", km: 5, desnivel: 80, tipo: "Circular", resumen: "Acantilados costeros con vistas e historia marinera." },
+  { name: "Vía Verde del Pas", zona: "Valles Pasiegos", km: 6, desnivel: 40, tipo: "Lineal", resumen: "Accesible y llana, con granjas por el camino. Ideal con carrito o bici." },
+  { name: "Ruta Accesible de Ramales de la Victoria", zona: "Ramales (Asón-Agüera)", km: 2, desnivel: 20, tipo: "Lineal", resumen: "Paseo corto, sencillo y accesible para todas las edades." },
+  { name: "Ruta del Arroyo Troncos", zona: "Polientes (Valderredible)", km: 6, desnivel: 120, tipo: "Circular", resumen: "Sendero por el municipio más meridional de toda Cantabria." },
+  { name: "La Canal de las Tejeras", zona: "Besaya", km: 5, desnivel: 150, tipo: "Lineal", resumen: "Senda fluvial poco conocida, muy fácil. ¡La que hicimos ayer!" },
+  { name: "Costa Quebrada por Cuchía", zona: "Miengo", km: 4, desnivel: 50, tipo: "Lineal", resumen: "Etapa costera del parque geológico Costa Quebrada hasta Santander." },
+  { name: "Senda de Peñas Negras al Alto de la Gigüela", zona: "Maoño (Santander)", km: 4, desnivel: 120, tipo: "Circular", resumen: "Muy sencilla, con vistas amplias desde el mirador." },
+  { name: "La Picota de Liencres", zona: "Liencres", km: 3, desnivel: 150, tipo: "Circular", resumen: "Ascensión mítica pero muy corta, con grandes vistas sobre la costa." },
+  { name: "Minas de Udías (Vía Verde de Pelurgo)", zona: "Costa Occidental", km: 6, desnivel: 80, tipo: "Lineal", resumen: "Vía verde minera muy querida por los cántabros. Cómoda y llana." },
+  { name: "Los Pozos de Valcaba", zona: "Pámanes (Trasmiera)", km: 4, desnivel: 100, tipo: "Circular", resumen: "Recorrido fácil junto a pozas de agua; refrescante en verano." },
+  { name: "Las Cascadas de Lamiña", zona: "Saja-Nansa", km: 3, desnivel: 80, tipo: "Lineal", resumen: "Clásico cántabro, ruta muy sencilla y segura entre cascadas." },
+  { name: "Ruta a Porcieda (pueblo abandonado)", zona: "Liébana", km: 5, desnivel: 250, tipo: "Lineal", resumen: "Excursión a un núcleo histórico abandonado en plena Liébana." },
+  { name: "Los Pozos de Noja", zona: "Miera–Liérganes", km: 3, desnivel: 60, tipo: "Circular", resumen: "Dos lagunas entre prados, paseo tranquilo y verde." },
+  { name: "Ruta de la Llasca de los Moros", zona: "Besaya", km: 4, desnivel: 100, tipo: "Circular", resumen: "Paseo muy agradable y desconocido, perfecto para hacer con niños." },
+  { name: "Centro Geográfico de Cantabria", zona: "Anievas (Besaya)", km: 4, desnivel: 150, tipo: "Circular", resumen: "Visita curiosa al corazón geográfico exacto de la región." },
+  { name: "La Casa del Monte de Ucieda", zona: "Saja-Nansa", km: 5, desnivel: 120, tipo: "Circular", resumen: "Día inolvidable en plena reserva natural del Saja, entre robles." },
+  { name: "El Churrón de Borleña", zona: "Valles Pasiegos", km: 3, desnivel: 100, tipo: "Lineal", resumen: "Cascada; considerada 'la ruta para niños más bonita de Cantabria'." },
+  { name: "Cueva de Cucabrera en Galizano", zona: "Ribamontán al Mar", km: 3, desnivel: 40, tipo: "Lineal", resumen: "Exploración de cueva costera apta para familias aventureras." },
+  { name: "Senda Mitológica del Monte Hozarco", zona: "Peñarrubia (Liébana)", km: 5, desnivel: 200, tipo: "Circular", resumen: "Sendero temático con el mirador de Santa Catalina como premio." },
+  { name: "Cueva del Canónigo en Rucandio", zona: "Trasmiera", km: 2, desnivel: 60, tipo: "Lineal", resumen: "Cueva 'la mejor para visitar con niños' según los locales." },
+  { name: "Río Saja: senda fluvial desde Carrejo", zona: "Cabezón de la Sal", km: 4, desnivel: 30, tipo: "Lineal", resumen: "Paseo llano y bonito junto al río Saja, con sombra." },
+  { name: "La joya escondida del río Saja (El Camarao)", zona: "Puente San Miguel", km: 2, desnivel: 20, tipo: "Lineal", resumen: "Paseo corto al parque de El Camarao, junto al río." },
+  { name: "La Fuente del Francés de Hoznayo", zona: "Entrambasaguas", km: 2, desnivel: 20, tipo: "Circular", resumen: "Entorno histórico con manantial; recorrido corto y accesible." },
+  { name: "Ruta a la Virgen de las Nieves", zona: "Asón-Agüera", km: 5, desnivel: 150, tipo: "Lineal", resumen: "Escapada fácil, grande y segura, probada con peques." }
 ];
 
 const canvas = document.getElementById("wheel");
@@ -241,17 +307,150 @@ function drawWheel() {
 }
 drawWheel();
 
-// lista completa
+// Enlaces a Google Maps generados desde nombre + zona (robusto para las 62 rutas)
+function mapsQuery(r) {
+  return encodeURIComponent(`${r.name}, ${r.zona}, Cantabria, España`);
+}
+function mapsSearchUrl(r) {
+  return `https://www.google.com/maps/search/?api=1&query=${mapsQuery(r)}`;
+}
+function mapsDirectionsUrl(r) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${mapsQuery(r)}`;
+}
+// Enlaces DIRECTOS al track de Wikiloc, resueltos uno a uno (junio 2026).
+// Si una ruta no está aquí, se cae a una búsqueda en Google restringida a wikiloc.com.
+const wikilocLinks = {
+  "Bosque de Secuoyas de Cabezón de la Sal": "https://www.wikiloc.com/hiking-trails/bosque-de-secuoyas-monte-de-cabezon-de-la-sal-72381719",
+  "Dunas de Liencres": "https://www.wikiloc.com/hiking-trails/dunas-de-liencres-circular-53267738",
+  "Faro de Cabo Mayor": "https://www.wikiloc.com/walking-trails/faro-cabo-mayor-playa-bocal-santander-18588293",
+  "Nacimiento del Río Asón": "https://www.wikiloc.com/hiking-trails/ason-cascada-del-ason-ason-9143605",
+  "Ría de San Vicente de la Barquera": "https://www.wikiloc.com/walking-trails/san-vicente-de-la-barquera-castillo-del-rey-39571114",
+  "Molinos del Río Aguanaz": "https://www.wikiloc.com/hiking-trails/surgencia-del-rio-aguanaz-y-barrios-de-entrambasaguas-93263515",
+  "Fuente Dé y praderas de Áliva": "https://es.wikiloc.com/rutas-senderismo/fuente-de-refugio-aliva-por-chalet-real-26488136",
+  "Pozo Tremeo y Saja": "https://www.wikiloc.com/hiking-trails/senda-del-pozo-tremeo-59264833",
+  "Playa y senda de Oyambre": "https://es.wikiloc.com/rutas-senderismo/playa-de-oyambre-desde-comillas-38108416",
+  "Cabárceno (senderos del parque)": "https://www.wikiloc.com/walking-trails/parque-natural-de-cabarceno-137327336",
+  "Embalse del Ebro (presa y orillas)": "https://www.wikiloc.com/hiking-trails/circular-en-la-presa-del-embalse-del-ebro-4592096",
+  "Cascada del Bolao (Cóbreces)": "https://www.wikiloc.com/hiking-trails/cascada-molino-el-bolao-desde-cobreces-cantabria-6758347",
+  "Sendero del Río Gándara": "https://www.wikiloc.com/walking-trails/ruta-circular-por-el-rio-gandara-la-gandara-cantabria-57071849",
+  "Marismas de Santoña (observatorio)": "https://www.wikiloc.com/hiking-trails/paseo-por-la-marisma-de-santona-9467872",
+  "Monte Buciero – Faro del Caballo": "https://www.wikiloc.com/hiking-trails/monte-buciero-y-faro-del-caballo-12298902",
+  "Costa Quebrada – Urros de Liencres": "https://www.wikiloc.com/walking-trails/urros-de-liencres-paseo-por-los-acantilados-de-la-costa-quebrada-desde-la-playa-de-portio-a-la-play-85488535",
+  "Playa de Langre y su mirador": "https://es.wikiloc.com/rutas-senderismo/mirador-langre-y-playa-de-langre-desde-langre-161861693",
+  "Lagos de la zona de Brañavieja": "https://es.wikiloc.com/rutas-senderismo/branavieja-los-habitats-de-alto-campoo-83084172",
+  "Bárcena Mayor (pueblo y río)": "https://es.wikiloc.com/rutas-senderismo/barcena-mayor-con-ninos-15924964",
+  "Sendero de los Molinos de Liérganes": "https://es.wikiloc.com/rutas-senderismo/senda-de-los-molinos-circular-51025463",
+  "Cueva de El Pendo (entorno)": "https://www.wikiloc.com/hiking-trails/cueva-del-pendo-ermita-san-pantaleon-59890122",
+  "Mirador de la Cardosa": "https://www.wikiloc.com/hiking-trails/puerto-de-la-palombera-balcon-de-la-cardosa-6910525",
+  "Senda fluvial del río Pisueña": "https://es.wikiloc.com/rutas-senderismo/senda-fluvial-pisuena-23661523",
+  "Paseo Fluvial de las Escubias de Barcenaciones": "https://www.wikiloc.com/hiking-trails/paseo-por-barcenaciones-91621294",
+  "Calzada Romana del Monte Fresneda": "https://es.wikiloc.com/rutas-senderismo/calzada-del-monte-fresneda-17902877",
+  "El Castillo de Montehano": "https://es.wikiloc.com/rutas-senderismo/escalante-castillo-de-montehano-92974451",
+  "Senda Fluvial del Río Besaya": "https://www.wikiloc.com/hiking-trails/senda-fluvial-del-rio-besaya-tramo-somahoz-cieza-115296461",
+  "El Castillo de Vispieres": "https://www.wikiloc.com/hiking-trails/ruta-al-castillo-de-vispieres-65672254",
+  "Ruta Mitológica del Monte Tejas": "https://www.wikiloc.com/hiking-trails/san-felices-de-buelna-senda-mitologica-del-monte-tejas-153663714",
+  "El Callejón de los Lobos": "https://www.wikiloc.com/hiking-trails/eco-ruta-del-callejon-de-los-lobos-trampa-de-lobos-de-cabuerniga-175787131",
+  "Vía Verde del Piquillo": "https://es.wikiloc.com/rutas-senderismo/via-verde-del-piquillo-pobena-a-onton-16618810",
+  "El sendero de los porqués": "https://www.wikiloc.com/walking-trails/el-sendero-de-los-porques-79982658",
+  "Mirador del Monte Cincho": "https://www.wikiloc.com/hiking-trails/ruta-monte-cincho-ecoparque-de-trasmiera-arnuero-13666589",
+  "Ruta Accesible por la Ría de Limpias": "https://www.wikiloc.com/walking-trails/ria-de-limpias-y-muelle-el-ribero-9431066",
+  "Ruta al Refugio Número 6": "https://www.wikiloc.com/walking-trails/refugio-de-pesca-n-6-gibaja-74666836",
+  "Acantilados de Tagle y Torre de San Telmo": "https://es.wikiloc.com/rutas-senderismo/acantilados-de-tagle-79196807",
+  "Vía Verde del Pas": "https://es.wikiloc.com/rutas-senderismo/via-verde-del-pas-75784553",
+  "Ruta Accesible de Ramales de la Victoria": "https://es.wikiloc.com/rutas-sendero-accesible/ruta-adaptada-por-la-ribera-del-rio-ason-en-ramales-de-la-victoria-santander-11048546",
+  "Ruta del Arroyo Troncos": "https://es.wikiloc.com/rutas-senderismo/pueblos-matorrizos-arroyo-troncos-179169664",
+  "La Canal de las Tejeras": "https://www.wikiloc.com/hiking-trails/cascadas-del-rio-de-la-canal-de-las-tejeras-y-ermita-de-san-roman-de-moroso-besaya-89192220",
+  "Costa Quebrada por Cuchía": "https://www.wikiloc.com/hiking-trails/miengo-cuchia-costa-quebrada-75018507",
+  "Senda de Peñas Negras al Alto de la Gigüela": "https://www.wikiloc.com/hiking-trails/senda-de-penas-negras-alto-de-la-giguela-maono-santa-cruz-de-bezana-cantabria-23346663",
+  "La Picota de Liencres": "https://www.wikiloc.com/hiking-trails/la-picota-liencres-3776370",
+  "Minas de Udías (Vía Verde de Pelurgo)": "https://www.wikiloc.com/hiking-trails/minas-de-udias-80806425",
+  "Los Pozos de Valcaba": "https://www.wikiloc.com/hiking-trails/pr-s-26-pozos-de-valcaba-63740662",
+  "Las Cascadas de Lamiña": "https://www.wikiloc.com/hiking-trails/valle-del-saja-nansa-valle-de-cabuernigacantabria-cascadas-de-lamina-122754401",
+  "Ruta a Porcieda (pueblo abandonado)": "https://www.wikiloc.com/hiking-trails/visita-al-pueblo-abandonado-de-porcieda-111417694",
+  "Los Pozos de Noja": "https://es.wikiloc.com/rutas-a-pie/127-pozos-de-noja-con-ninos-100323389",
+  "Ruta de la Llasca de los Moros": "https://www.wikiloc.com/hiking-trails/la-llasca-de-los-moros-20400017",
+  "Centro Geográfico de Cantabria": "https://www.wikiloc.com/walking-trails/centro-geografico-de-cantabria-desde-calga-134784942",
+  "La Casa del Monte de Ucieda": "https://www.wikiloc.com/hiking-trails/parque-natural-saja-besaya-los-puentes-de-ucieda-o-sendero-de-rozas-o-monte-rio-de-los-vados-prs-11-29536208",
+  "El Churrón de Borleña": "https://www.wikiloc.com/hiking-trails/ruta-churron-de-borlena-3131185",
+  "Cueva de Cucabrera en Galizano": "https://www.wikiloc.com/walking-trails/galizano-cueva-de-cucabrera-y-playa-de-galizano-35667841",
+  "Senda Mitológica del Monte Hozarco": "https://www.wikiloc.com/walking-trails/monte-hozarco-senda-mitologica-y-mirador-de-santa-catalina-penarrubia-45352737",
+  "Cueva del Canónigo en Rucandio": "https://www.wikiloc.com/hiking-trails/cueva-del-canonigo-en-rucandio-69400497",
+  "Río Saja: senda fluvial desde Carrejo": "https://www.wikiloc.com/hiking-trails/senda-fluvial-del-minchon-pr-s-120-desde-carrejo-cabezon-de-la-sal-23840217",
+  "La joya escondida del río Saja (El Camarao)": "https://www.wikiloc.com/walking-trails/senda-fluvial-del-saja-puente-san-miguel-camarao-15319598",
+  "La Fuente del Francés de Hoznayo": "https://www.wikiloc.com/walking-trails/fuente-del-frances-hoznayo-66931768",
+  "Ruta a la Virgen de las Nieves": "https://www.wikiloc.com/hiking-trails/virgen-de-las-nieves-desde-rascon-26908957"
+};
+
+// Track en Wikiloc: enlace directo si lo tenemos; si no, búsqueda en Google
+// restringida a wikiloc.com (limpiando paréntesis y prefijos tipo "Ruta a/de").
+function wikilocUrl(r) {
+  if (wikilocLinks[r.name]) return wikilocLinks[r.name];
+  const limpio = r.name
+    .replace(/\s*\([^)]*\)/g, "")
+    .replace(/^(Ruta|Sendero|Senda|Paseo|Subida)\s+(a|al|de|del|por|por la)\s+/i, "")
+    .trim();
+  return `https://www.google.com/search?q=${encodeURIComponent("site:wikiloc.com " + limpio + " Cantabria")}`;
+}
+
+// lista filtrable
 const listEl = document.getElementById("listEl");
-rutas.forEach(r => {
-  const li = document.createElement("li");
-  li.innerHTML = `<b>${r.name}</b> — ${r.zona}. ${r.info}`;
-  listEl.appendChild(li);
+const fSearch = document.getElementById("fSearch");
+const fTipo = document.getElementById("fTipo");
+const fDist = document.getElementById("fDist");
+const fDesn = document.getElementById("fDesn");
+const fReset = document.getElementById("fReset");
+const fCount = document.getElementById("fCount");
+
+function matchRango(valor, sel, corteBajo, corteAlto) {
+  if (sel === "s") return valor <= corteBajo;
+  if (sel === "m") return valor > corteBajo && valor <= corteAlto;
+  if (sel === "l") return valor > corteAlto;
+  return true;
+}
+
+function renderList() {
+  const q = fSearch.value.trim().toLowerCase();
+  const tipo = fTipo.value;
+  const dist = fDist.value;
+  const desn = fDesn.value;
+
+  const filtradas = rutas.filter(r => {
+    if (q && !(`${r.name} ${r.zona} ${r.resumen}`.toLowerCase().includes(q))) return false;
+    if (tipo && r.tipo !== tipo) return false;
+    if (!matchRango(r.km, dist, 3, 5)) return false;
+    if (!matchRango(r.desnivel, desn, 50, 150)) return false;
+    return true;
+  });
+
+  fCount.textContent = `${filtradas.length} de ${rutas.length} rutas`;
+  listEl.innerHTML = "";
+  if (!filtradas.length) {
+    listEl.innerHTML = `<li class="empty">No hay rutas con esos filtros. Prueba a aflojarlos.</li>`;
+    return;
+  }
+  filtradas.forEach(r => {
+    const li = document.createElement("li");
+    li.innerHTML = `<b>${r.name}</b> — ${r.zona} · ${r.km} km · ${r.desnivel} m · ${r.tipo}. ${r.resumen} ` +
+      `<a href="${mapsSearchUrl(r)}" target="_blank" rel="noopener" title="Cómo llegar (Google Maps)">🗺️</a> ` +
+      `<a href="${wikilocUrl(r)}" target="_blank" rel="noopener" title="Track en Wikiloc">📍</a>`;
+    listEl.appendChild(li);
+  });
+}
+
+[fSearch, fTipo, fDist, fDesn].forEach(el => el.addEventListener("input", renderList));
+fReset.addEventListener("click", () => {
+  fSearch.value = ""; fTipo.value = ""; fDist.value = ""; fDesn.value = "";
+  renderList();
 });
+renderList();
 
 const spinBtn = document.getElementById("spin");
 const resultName = document.getElementById("resultName");
+const resultStats = document.getElementById("resultStats");
 const resultMeta = document.getElementById("resultMeta");
+const resultActions = document.getElementById("resultActions");
+const dirLink = document.getElementById("dirLink");
+const trackLink = document.getElementById("trackLink");
 let currentRot = 0;
 let spinning = false;
 
@@ -261,6 +460,7 @@ spinBtn.addEventListener("click", () => {
   spinBtn.disabled = true;
   resultName.textContent = "…";
   resultMeta.textContent = "";
+  resultActions.hidden = true;
 
   const idx = Math.floor(Math.random() * n);
   const extraTurns = 5 + Math.floor(Math.random() * 4); // 5–8 vueltas
@@ -272,7 +472,14 @@ spinBtn.addEventListener("click", () => {
   setTimeout(() => {
     const r = rutas[idx];
     resultName.textContent = r.name;
-    resultMeta.textContent = `📍 ${r.zona} · ${r.info}`;
+    resultStats.innerHTML =
+      `<span>📏 ${r.km} km</span>` +
+      `<span>⛰️ ${r.desnivel} m</span>` +
+      `<span>${r.tipo === "Circular" ? "🔄" : "↔️"} ${r.tipo}</span>`;
+    resultMeta.innerHTML = `📍 <b>${r.zona}</b><br>${r.resumen}`;
+    dirLink.href = mapsDirectionsUrl(r);
+    trackLink.href = wikilocUrl(r);
+    resultActions.hidden = false;
     spinning = false;
     spinBtn.disabled = false;
   }, 6100);
