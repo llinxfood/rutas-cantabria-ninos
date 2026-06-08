@@ -10,13 +10,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    // Nombres fijos (sin hash): cada build sobrescribe limpio al copiar a la raíz.
-    rollupOptions: {
-      output: {
-        entryFileNames: 'assets/app.js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/app.[ext]',
-      },
-    },
+    // Nombres con hash (cache-busting): cada cambio genera URL nueva,
+    // así el navegador (también el móvil) nunca sirve una versión cacheada.
   },
 })

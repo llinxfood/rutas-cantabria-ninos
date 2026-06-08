@@ -3,6 +3,9 @@ import confetti from 'canvas-confetti'
 import { routes, comarcas, mapsDirectionsUrl, wikilocUrl, slugify, routeBySlug, categoryOf, isAccessible } from './data.js'
 import Wheel from './components/Wheel.jsx'
 import RouteMap from './components/RouteMap.jsx'
+import waLogo from './icons/whatsapp.svg'
+import mapsLogo from './icons/googlemaps.svg'
+import wikilocLogo from './icons/wikiloc.svg'
 
 const SITE_URL = 'https://llinxfood.github.io/ruleta-rutas-cantabria-peques/'
 const shareUrl = r => `${SITE_URL}#ruta=${slugify(r.name)}`
@@ -29,13 +32,20 @@ function Actions({ r, center }) {
       setCopied(true); setTimeout(() => setCopied(false), 1800)
     })
   }
-  const btn = "inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold shadow-sm transition hover:brightness-105 hover:-translate-y-0.5"
+  const btn = "inline-flex items-center gap-2 rounded-full border border-forest/15 bg-paper px-4 py-2.5 text-sm font-bold text-forest shadow-sm transition hover:border-forest/30 hover:-translate-y-0.5"
+  const ico = "h-[18px] w-[18px]"
   return (
     <div className={`flex flex-wrap gap-2.5 ${center ? 'justify-center' : ''}`}>
-      <a href={mapsDirectionsUrl(r)} target="_blank" rel="noopener" className={btn + " bg-terracota text-cream"}>🚗 Cómo llegar</a>
-      <a href={wikilocUrl(r)} target="_blank" rel="noopener" className={btn + " text-white"} style={{ background: '#ff6a00' }}>📍 Wikiloc</a>
-      <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(waText + ' ' + shareUrl(r))}`} target="_blank" rel="noopener" className={btn + " text-white"} style={{ background: '#25D366' }}>🟢 WhatsApp</a>
-      <button onClick={copy} className="inline-flex items-center gap-1.5 rounded-full border border-forest/20 bg-paper px-4 py-2.5 text-sm font-bold text-forest transition hover:bg-forest/5">
+      <a href={mapsDirectionsUrl(r)} target="_blank" rel="noopener" className={btn}>
+        <img src={mapsLogo} alt="" className={ico} /> Cómo llegar
+      </a>
+      <a href={wikilocUrl(r)} target="_blank" rel="noopener" className={btn}>
+        <img src={wikilocLogo} alt="" className={ico} /> Wikiloc
+      </a>
+      <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(waText + ' ' + shareUrl(r))}`} target="_blank" rel="noopener" className={btn}>
+        <img src={waLogo} alt="" className={ico} /> WhatsApp
+      </a>
+      <button onClick={copy} className={btn}>
         {copied ? '✓ ¡Copiado!' : '🔗 Copiar enlace'}
       </button>
     </div>

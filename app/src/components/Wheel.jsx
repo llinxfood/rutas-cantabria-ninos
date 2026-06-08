@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
-const COLORS = ["#1b6b4a", "#238a5e", "#2f9e6e", "#0f5d3f", "#3aaf7c", "#157a52"]
+// Paleta cálida cohesionada con el tema (verdes + terracota + tierra)
+const COLORS = ["#2e6b4f", "#c46a3f", "#1f4536", "#a8552f", "#3f7a5e", "#8a3d22"]
 
 const Wheel = forwardRef(function Wheel({ routes, onResult }, ref) {
   const canvasRef = useRef(null)
