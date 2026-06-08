@@ -37,6 +37,24 @@ function Actions({ r, center, compact }) {
   const btn = base + " gap-2 px-4 py-2.5"
   const iconBtn = base + " h-10 w-10"
   const ico = "h-[18px] w-[18px]"
+  if (compact) {
+    return (
+      <div className="flex flex-wrap items-center gap-2.5">
+        <a href={mapsDirectionsUrl(r)} target="_blank" rel="noopener" className={iconBtn} title="Cómo llegar en coche" aria-label="Cómo llegar en coche">
+          <img src={mapsLogo} alt="" className={ico} />
+        </a>
+        <a href={wikilocUrl(r)} target="_blank" rel="noopener" className={iconBtn} title="Ver track en Wikiloc" aria-label="Ver track en Wikiloc">
+          <img src={wikilocLogo} alt="" className={ico} />
+        </a>
+        <a href={waHref} target="_blank" rel="noopener" className={iconBtn} title="Compartir por WhatsApp" aria-label="Compartir por WhatsApp">
+          <img src={waLogo} alt="" className={ico} />
+        </a>
+        <button onClick={copy} className={iconBtn} title={copied ? '¡Copiado!' : 'Copiar enlace'} aria-label="Copiar enlace">
+          {copied ? '✓' : '🔗'}
+        </button>
+      </div>
+    )
+  }
   return (
     <div className={`flex flex-wrap items-center gap-2.5 ${center ? 'justify-center' : ''}`}>
       <a href={mapsDirectionsUrl(r)} target="_blank" rel="noopener" className={btn}>
@@ -45,25 +63,12 @@ function Actions({ r, center, compact }) {
       <a href={wikilocUrl(r)} target="_blank" rel="noopener" className={btn}>
         <img src={wikilocLogo} alt="" className={ico} /> Wikiloc
       </a>
-      {compact ? (
-        <>
-          <a href={waHref} target="_blank" rel="noopener" className={iconBtn} title="Compartir por WhatsApp" aria-label="Compartir por WhatsApp">
-            <img src={waLogo} alt="" className={ico} />
-          </a>
-          <button onClick={copy} className={iconBtn} title={copied ? '¡Copiado!' : 'Copiar enlace'} aria-label="Copiar enlace">
-            {copied ? '✓' : '🔗'}
-          </button>
-        </>
-      ) : (
-        <>
-          <a href={waHref} target="_blank" rel="noopener" className={btn}>
-            <img src={waLogo} alt="" className={ico} /> WhatsApp
-          </a>
-          <button onClick={copy} className={btn}>
-            {copied ? '✓ ¡Copiado!' : '🔗 Copiar enlace'}
-          </button>
-        </>
-      )}
+      <a href={waHref} target="_blank" rel="noopener" className={btn}>
+        <img src={waLogo} alt="" className={ico} /> WhatsApp
+      </a>
+      <button onClick={copy} className={btn}>
+        {copied ? '✓ ¡Copiado!' : '🔗 Copiar enlace'}
+      </button>
     </div>
   )
 }
