@@ -97,3 +97,81 @@ export function wikilocUrl(r) {
     .trim()
   return `https://www.google.com/search?q=${encodeURIComponent("site:wikiloc.com " + limpio + " Cantabria")}`
 }
+
+// --- Enlace profundo (compartir una ruta concreta) ---
+export function slugify(name) {
+  return name
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+export function routeBySlug(slug) {
+  return routes.find(r => slugify(r.name) === slug) || null
+}
+
+// --- Categoría / tipo de plan (icono visual, derivado del texto) ---
+const CATS = [
+  { key: 'cascada', icon: '💧', test: /cascada|churr[óo]n|nacimiento/i },
+  { key: 'cueva', icon: '🦇', test: /cueva|covalanas|soplao|canónigo|cucabrera|pendo|monte castillo/i },
+  { key: 'mirador', icon: '🔭', test: /mirador|gigüela|cardosa|cincho/i },
+  { key: 'playa/costa', icon: '🌊', test: /playa|dunas|acantilad|faro|r[íi]a|urros|costa|puntal|cabo|berria|oyambre|langre|covachos/i },
+  { key: 'río/agua', icon: '🏞️', test: /r[íi]o|fluvial|pozas|pozos|embalse|aguanaz|miera|saja|besaya|pisueña|gándara|tejeras/i },
+  { key: 'bosque', icon: '🌳', test: /bosque|secuoyas|robled|hayas|ucieda|tremeo/i },
+  { key: 'pueblo/cultura', icon: '🏛️', test: /castillo|calzada|romana|capricho|comillas|bárcena|mitológic|cabárceno|porcieda|escubias|geográfico|lobos/i },
+  { key: 'montaña', icon: '⛰️', test: /tetas|picota|áliva|brañavieja|monte|pico|alto|hozarco|tejas/i },
+]
+export function categoryOf(r) {
+  const hay = `${r.name} ${r.resumen}`
+  for (const c of CATS) if (c.test.test(hay)) return c
+  return { key: 'paseo', icon: '🥾' }
+}
+
+// --- Apto carrito / accesible ---
+const ACCESSIBLE = new Set([
+  "Ruta Accesible por la Ría de Limpias",
+  "Ruta Accesible de Ramales de la Victoria",
+  "Vía Verde del Pas",
+  "Vía Verde del Piquillo",
+  "Faro de Cabo Mayor",
+  "Marismas de Santoña (observatorio)",
+  "Parque de Mataleñas",
+  "Senda fluvial del río Pisueña",
+  "Playa de Berria (Santoña)",
+  "Minas de Udías (Vía Verde de Pelurgo)",
+])
+export function isAccessible(r) { return ACCESSIBLE.has(r.name) }
+
+// --- Coordenadas aproximadas por municipio/zona (para el mapa) ---
+const ZONA_COORDS = {
+  "Monte Cabezón": [43.31, -4.23], "Liencres": [43.47, -3.93], "Santander": [43.46, -3.81],
+  "Soba": [43.18, -3.59], "San Vicente": [43.39, -4.39], "Entrambasaguas": [43.36, -3.69],
+  "Picos de Europa": [43.15, -4.81], "Rumoroso": [43.27, -4.04], "Comillas": [43.39, -4.29],
+  "Penagos": [43.36, -3.79], "Rionansa": [43.27, -4.43], "Campoo": [42.99, -3.99],
+  "Liérganes": [43.33, -3.72], "Alfoz de Lloredo": [43.39, -4.20], "Piélagos": [43.46, -3.94],
+  "Ribamontán al Mar": [43.47, -3.71], "Alto Campoo": [43.05, -4.38], "Los Tojos": [43.15, -4.27],
+  "Escobedo": [43.40, -3.86], "Saja-Nansa": [43.13, -4.30], "Castañeda": [43.32, -3.91],
+  "Reocín": [43.33, -4.16], "Los Corrales de Buelna": [43.26, -4.07], "Escalante": [43.45, -3.51],
+  "Somahoz a Cieza": [43.25, -4.05], "Santillana del Mar": [43.39, -4.10],
+  "San Felices de Buelna": [43.27, -4.03], "Cabuérniga": [43.18, -4.29], "Ontón": [43.35, -3.18],
+  "Camargo": [43.40, -3.87], "Arnuero": [43.49, -3.56], "Limpias": [43.36, -3.41],
+  "Gibaja": [43.27, -3.43], "Suances": [43.43, -4.04], "Valles Pasiegos": [43.30, -3.82],
+  "Ramales": [43.26, -3.46], "Polientes (Valderredible)": [42.83, -3.96], "Besaya": [43.25, -4.05],
+  "Miengo": [43.43, -3.99], "Maoño": [43.45, -3.88], "Udías": [43.34, -4.27],
+  "Pámanes": [43.35, -3.74], "Ruente": [43.24, -4.27], "Vega de Liébana": [43.12, -4.62],
+  "Miera–Liérganes": [43.28, -3.70], "Valdáliga": [43.32, -4.36], "Anievas": [43.20, -4.00],
+  "Peñarrubia": [43.27, -4.55], "Medio Cudeyo": [43.36, -3.72], "Cabezón de la Sal": [43.31, -4.24],
+  "Puente San Miguel": [43.35, -4.10], "Guriezo": [43.31, -3.34], "Bareyo": [43.50, -3.59],
+  "Ramales de la Victoria": [43.26, -3.46], "Pechón (Val de San Vicente)": [43.39, -4.45],
+  "Arenas de Iguña": [43.19, -4.02], "Rubalcaba (Liérganes)": [43.30, -3.71],
+  "Castro Urdiales": [43.38, -3.22],
+}
+const COMARCA_COORDS = {
+  "Saja-Nansa": [43.18, -4.33], "Santander": [43.46, -3.82], "Costa Occidental": [43.39, -4.30],
+  "Trasmiera": [43.45, -3.62], "Asón-Agüera": [43.26, -3.46], "Besaya": [43.28, -4.05],
+  "Liébana": [43.15, -4.65], "Campoo": [42.99, -4.05], "Valles Pasiegos": [43.25, -3.78],
+  "Costa Oriental": [43.38, -3.22],
+}
+export function coordsOf(r) {
+  return ZONA_COORDS[r.zona] || COMARCA_COORDS[r.comarca] || [43.2, -4.0]
+}
