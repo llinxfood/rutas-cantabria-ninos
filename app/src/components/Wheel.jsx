@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
-// Paleta cálida cohesionada con el tema (verdes + terracota + tierra)
-const COLORS = ["#2e6b4f", "#c46a3f", "#1f4536", "#a8552f", "#3f7a5e", "#8a3d22"]
+// Paleta apagada/terrosa para integrarse con el crema (salvia, arcilla, arena)
+const COLORS = ["#88a890", "#d3a07c", "#a7bda9", "#cdab78", "#7e9b85", "#dbb48d"]
 
 const Wheel = forwardRef(function Wheel({ routes, onResult }, ref) {
   const canvasRef = useRef(null)
@@ -25,9 +25,9 @@ const Wheel = forwardRef(function Wheel({ routes, onResult }, ref) {
       ctx.moveTo(R, R)
       ctx.arc(R, R, R - 6, start, start + arc)
       ctx.closePath()
-      ctx.fillStyle = i === highlight ? '#f3cd7e' : COLORS[i % COLORS.length]
+      ctx.fillStyle = i === highlight ? '#c46a3f' : COLORS[i % COLORS.length]
       ctx.fill()
-      ctx.strokeStyle = i === highlight ? '#fff' : 'rgba(255,255,255,.15)'
+      ctx.strokeStyle = i === highlight ? '#fffdf7' : 'rgba(255,253,247,.55)'
       ctx.lineWidth = i === highlight ? 4 : 2
       ctx.stroke()
 
@@ -35,7 +35,7 @@ const Wheel = forwardRef(function Wheel({ routes, onResult }, ref) {
       ctx.translate(R, R)
       ctx.rotate(start + arc / 2)
       ctx.textAlign = 'right'
-      ctx.fillStyle = i === highlight ? '#0c3024' : '#fff'
+      ctx.fillStyle = i === highlight ? '#fffdf7' : '#1f3d2e'
       ctx.font = `bold ${Math.max(9, Math.min(15, 360 / n))}px "Inter", sans-serif`
       let label = routes[i].name
       const maxChars = n > 40 ? 22 : 34
