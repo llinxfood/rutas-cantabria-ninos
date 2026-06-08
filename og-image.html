@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: "Inter", sans-serif;
+    color: #f3eede;
+    background: radial-gradient(120% 90% at 25% -10%, #1a5a40 0%, #123f2e 45%, #0c3024 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .mountains {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 220px; z-index: 0;
+  }
+  .content {
+    position: relative; z-index: 2;
+    padding: 0 0 0 80px;
+    width: 660px;
+  }
+  .eyebrow {
+    font-size: 22px; letter-spacing: .28em; text-transform: uppercase;
+    color: #9bc1a8; font-weight: 600; margin-bottom: 22px;
+  }
+  h1 {
+    font-family: "Fraunces", serif; font-weight: 600;
+    font-size: 76px; line-height: 1.02; color: #fff;
+    letter-spacing: -.5px; margin-bottom: 26px;
+  }
+  h1 .accent { color: #e7b85f; font-style: italic; }
+  .sub { font-size: 27px; line-height: 1.45; color: #f3eede; opacity: .92; margin-bottom: 34px; max-width: 30ch; }
+  .badges { display: flex; gap: 14px; flex-wrap: wrap; }
+  .badge {
+    background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.22);
+    border-radius: 999px; padding: 12px 24px; font-size: 23px; font-weight: 600;
+  }
+  .url {
+    position: absolute; z-index: 2; left: 80px; bottom: 44px;
+    font-size: 22px; color: #9bc1a8; font-weight: 600; letter-spacing: .02em;
+  }
+
+  /* Rueda decorativa */
+  .wheel-area {
+    position: absolute; right: 70px; top: 50%; transform: translateY(-50%); z-index: 2;
+    width: 380px; height: 380px;
+  }
+  .wheel {
+    width: 380px; height: 380px; border-radius: 50%;
+    background: conic-gradient(
+      #2e7d5b 0 30deg, #1b6b4a 30deg 60deg, #3aaf7c 60deg 90deg,
+      #157a52 90deg 120deg, #2e7d5b 120deg 150deg, #1b6b4a 150deg 180deg,
+      #3aaf7c 180deg 210deg, #157a52 210deg 240deg, #2e7d5b 240deg 270deg,
+      #1b6b4a 270deg 300deg, #3aaf7c 300deg 330deg, #157a52 330deg 360deg);
+    box-shadow: 0 0 0 10px rgba(243,238,222,.14), 0 0 0 20px rgba(12,48,36,.5), 0 30px 70px rgba(0,0,0,.5);
+    position: relative;
+  }
+  .hub {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 120px; height: 120px; border-radius: 50%;
+    border: 6px solid #f3eede;
+    background: radial-gradient(circle at 35% 30%, #f3cd7e, #e7b85f);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 52px;
+  }
+  .pointer {
+    position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0; border-left: 26px solid transparent; border-right: 26px solid transparent;
+    border-top: 46px solid #e7b85f; z-index: 3;
+    filter: drop-shadow(0 3px 5px rgba(0,0,0,.5));
+  }
+</style>
+</head>
+<body>
+  <svg class="mountains" viewBox="0 0 1200 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 130 L180 30 L320 110 L470 10 L640 120 L780 40 L940 135 L1080 55 L1200 140 L1200 220 L0 220 Z" fill="#104835"/>
+    <path d="M0 180 L160 110 L300 170 L460 95 L620 180 L800 120 L980 185 L1120 125 L1200 180 L1200 220 L0 220 Z" fill="#0c3024"/>
+  </svg>
+
+  <div class="content">
+    <div class="eyebrow">Cantabria · en familia</div>
+    <h1>Ruleta de <span class="accent">rutas</span> de senderismo</h1>
+    <div class="sub">62 senderos fáciles y aptos para ir con niños. ¡Gira y a caminar!</div>
+    <div class="badges">
+      <span class="badge">🥾 62 rutas</span>
+      <span class="badge">🚗 Cómo llegar</span>
+      <span class="badge">📍 Wikiloc</span>
+    </div>
+  </div>
+
+  <div class="wheel-area">
+    <div class="pointer"></div>
+    <div class="wheel"><div class="hub">🥾</div></div>
+  </div>
+
+  <div class="url">llinxfood.github.io/rutas-cantabria-ninos</div>
+</body>
+</html>

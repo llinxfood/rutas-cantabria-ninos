@@ -3,156 +3,253 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ruleta de Rutas de Senderismo en Cantabria (aptas para niños)</title>
+<title>Ruleta de Rutas de Cantabria en familia 🥾 · 62 senderos para niños</title>
+<meta name="description" content="62 senderos fáciles de Cantabria aptos para niños. Gira la ruleta y descubre tu próxima excursión, con cómo llegar en coche y el track GPS en Wikiloc.">
+<meta name="theme-color" content="#0c3024">
+
+<!-- Open Graph / LinkedIn / WhatsApp -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://llinxfood.github.io/rutas-cantabria-ninos/">
+<meta property="og:title" content="Ruleta de Rutas de Cantabria en familia 🥾">
+<meta property="og:description" content="62 senderos fáciles aptos para niños. Gira la ruleta y descubre tu próxima excursión: con cómo llegar en coche y el track GPS en Wikiloc.">
+<meta property="og:image" content="https://llinxfood.github.io/rutas-cantabria-ninos/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ruleta de Rutas de Cantabria en familia 🥾">
+<meta name="twitter:description" content="62 senderos fáciles aptos para niños. Gira y a caminar.">
+<meta name="twitter:image" content="https://llinxfood.github.io/rutas-cantabria-ninos/og-image.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg1: #0f3d2e;
-    --bg2: #1b6b4a;
-    --gold: #f4c542;
+    --forest-deep: #0c3024;
+    --forest: #123f2e;
+    --moss: #2e7d5b;
+    --salvia: #9bc1a8;
+    --cream: #f3eede;
+    --sand: #e7b85f;
+    --gold: #e7b85f;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     min-height: 100vh;
-    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-    background: radial-gradient(circle at 50% 0%, var(--bg2), var(--bg1));
-    color: #fff;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    color: var(--cream);
+    background:
+      radial-gradient(120% 80% at 50% -10%, #1a5a40 0%, var(--forest) 45%, var(--forest-deep) 100%);
+    background-attachment: fixed;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 16px 60px;
+    padding: 0 16px 50px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    position: relative;
+    width: 100vw;
+    margin-bottom: 14px;
+    padding: 46px 16px 120px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero-art {
+    position: absolute; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320' preserveAspectRatio='none'%3E%3Cpath d='M0 230 L180 120 L320 210 L470 90 L640 220 L780 130 L940 235 L1080 150 L1200 240 L1200 320 L0 320 Z' fill='%23104835'/%3E%3Cpath d='M0 280 L160 200 L300 270 L460 190 L620 280 L800 210 L980 285 L1120 220 L1200 280 L1200 320 L0 320 Z' fill='%230c3024'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    background-size: 100% auto;
+    opacity: .9;
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 1; }
+  .eyebrow {
+    font-size: .8rem; letter-spacing: .28em; text-transform: uppercase;
+    color: var(--salvia); margin: 0 0 10px; font-weight: 600;
   }
   h1 {
-    text-align: center;
-    font-size: clamp(1.3rem, 4vw, 2.2rem);
-    margin: 0 0 4px;
-    text-shadow: 0 2px 8px rgba(0,0,0,.4);
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    line-height: 1.05;
+    margin: 0 auto 12px;
+    max-width: 14ch;
+    color: #fff;
+    text-shadow: 0 2px 18px rgba(0,0,0,.35);
   }
+  h1 .accent { color: var(--sand); font-style: italic; }
   .sub {
-    opacity: .8;
-    font-size: .95rem;
-    margin-bottom: 22px;
-    text-align: center;
+    font-size: clamp(1rem, 2.4vw, 1.18rem);
+    color: var(--cream);
+    opacity: .9;
+    margin: 0 auto 22px;
+    max-width: 46ch;
+    line-height: 1.5;
   }
+  .badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(4px);
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: .88rem; font-weight: 600;
+    color: var(--cream);
+  }
+
+  /* ---------- WHEEL ---------- */
   .wheel-wrap {
     position: relative;
-    width: min(86vw, 560px);
-    height: min(86vw, 560px);
+    width: min(86vw, 540px);
+    height: min(86vw, 540px);
+    margin-top: -40px;
   }
-  /* Puntero */
   .pointer {
     position: absolute;
-    top: -6px;
+    top: -4px;
     left: 50%;
     transform: translateX(-50%);
     width: 0; height: 0;
-    border-left: 22px solid transparent;
-    border-right: 22px solid transparent;
-    border-top: 40px solid var(--gold);
-    filter: drop-shadow(0 3px 4px rgba(0,0,0,.5));
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-top: 38px solid var(--sand);
+    filter: drop-shadow(0 3px 5px rgba(0,0,0,.55));
     z-index: 5;
   }
   canvas {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    box-shadow: 0 0 0 10px rgba(255,255,255,.08),
-                0 0 0 18px rgba(0,0,0,.25),
-                0 18px 50px rgba(0,0,0,.45);
+    box-shadow: 0 0 0 8px rgba(243,238,222,.14),
+                0 0 0 16px rgba(12,48,36,.5),
+                0 24px 60px rgba(0,0,0,.5);
     transition: transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99);
   }
-  /* Botón central */
   #spin {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 92px; height: 92px;
+    width: 96px; height: 96px;
     border-radius: 50%;
-    border: 5px solid #fff;
-    background: var(--gold);
-    color: #0f3d2e;
+    border: 5px solid var(--cream);
+    background: radial-gradient(circle at 35% 30%, #f3cd7e, var(--sand));
+    color: var(--forest-deep);
     font-weight: 800;
-    font-size: 1rem;
+    font-family: "Fraunces", serif;
+    font-size: 1.05rem;
+    letter-spacing: .03em;
     cursor: pointer;
     z-index: 6;
-    box-shadow: 0 6px 18px rgba(0,0,0,.4);
+    box-shadow: 0 8px 22px rgba(0,0,0,.45);
     transition: transform .12s ease, filter .12s ease;
   }
-  #spin:hover { filter: brightness(1.08); }
+  #spin:hover { filter: brightness(1.06); }
   #spin:active { transform: translate(-50%, -50%) scale(.94); }
   #spin:disabled { cursor: not-allowed; filter: grayscale(.4) brightness(.9); }
 
+  /* ---------- RESULT ---------- */
   .result {
-    margin-top: 30px;
+    margin-top: 28px;
     min-height: 64px;
     text-align: center;
-    max-width: 640px;
+    width: 100%;
+    max-width: 620px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 20px;
+    padding: 22px 22px 26px;
   }
-  .result .label { font-size: .85rem; opacity: .7; letter-spacing: .1em; text-transform: uppercase; }
+  .result .label { font-size: .78rem; opacity: .65; letter-spacing: .18em; text-transform: uppercase; color: var(--salvia); }
   .result .name {
-    font-size: clamp(1.4rem, 5vw, 2.4rem);
-    font-weight: 800;
-    color: var(--gold);
-    margin-top: 4px;
-    text-shadow: 0 2px 10px rgba(0,0,0,.5);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(1.5rem, 5vw, 2.3rem);
+    font-weight: 600;
+    color: var(--sand);
+    margin-top: 6px;
+    line-height: 1.1;
   }
   .result .stats {
-    margin-top: 10px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    margin-top: 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
   }
   .result .stats span {
-    background: rgba(255,255,255,.12); border-radius: 999px;
-    padding: 4px 12px; font-size: .9rem; font-weight: 600;
+    background: rgba(155,193,168,.16); border: 1px solid rgba(155,193,168,.25);
+    border-radius: 999px; padding: 5px 13px; font-size: .9rem; font-weight: 600;
   }
-  .result .meta { margin-top: 10px; opacity: .9; font-size: 1rem; line-height: 1.4; }
-  .actions { margin-top: 16px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .result .meta { margin-top: 12px; opacity: .92; font-size: 1rem; line-height: 1.5; }
+  .actions { margin-top: 18px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   .actions[hidden] { display: none; }
   .btn-map {
     display: inline-flex; align-items: center; gap: 6px;
-    background: var(--gold); color: #0f3d2e;
+    background: var(--sand); color: var(--forest-deep);
     font-weight: 700; font-size: .95rem;
-    padding: 10px 18px; border-radius: 999px;
+    padding: 11px 19px; border-radius: 999px;
     text-decoration: none;
-    box-shadow: 0 4px 14px rgba(0,0,0,.35);
+    box-shadow: 0 6px 16px rgba(0,0,0,.3);
     transition: transform .12s ease, filter .12s ease;
   }
-  .btn-map:hover { filter: brightness(1.08); transform: translateY(-1px); }
-  .btn-map.secondary { background: rgba(255,255,255,.14); color: #fff; }
+  .btn-map:hover { filter: brightness(1.06); transform: translateY(-1px); }
   .btn-map.wikiloc { background: #ff6a00; color: #fff; }
 
+  /* ---------- LISTA / FILTROS ---------- */
   details {
-    margin-top: 34px;
+    margin-top: 28px;
     max-width: 720px;
     width: 100%;
-    background: rgba(0,0,0,.2);
-    border-radius: 12px;
-    padding: 14px 18px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 16px;
+    padding: 16px 20px;
   }
-  summary { cursor: pointer; font-weight: 600; }
-  .note { font-size: .82rem; opacity: .7; margin: 10px 0 4px; line-height: 1.4; }
-  .filters {
-    display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0;
-  }
+  summary { cursor: pointer; font-weight: 700; font-family: "Fraunces", serif; font-size: 1.05rem; color: var(--cream); }
+  .note { font-size: .82rem; opacity: .65; margin: 10px 0 4px; line-height: 1.4; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
   .filters input, .filters select, .filters .reset {
-    background: rgba(255,255,255,.1); color: #fff;
-    border: 1px solid rgba(255,255,255,.18); border-radius: 8px;
-    padding: 8px 12px; font-size: .9rem; font-family: inherit;
+    background: rgba(255,255,255,.08); color: var(--cream);
+    border: 1px solid rgba(255,255,255,.18); border-radius: 10px;
+    padding: 9px 13px; font-size: .9rem; font-family: inherit;
   }
   .filters input { flex: 1 1 180px; }
+  .filters input::placeholder { color: rgba(243,238,222,.55); }
   .filters select { cursor: pointer; }
-  .filters select option { background: #14543a; color: #fff; }
+  .filters select option { background: var(--forest); color: var(--cream); }
   .filters .reset { cursor: pointer; font-weight: 600; }
-  .filters .reset:hover { background: rgba(255,255,255,.2); }
-  .count { font-size: .85rem; opacity: .75; margin-bottom: 10px; }
+  .filters .reset:hover { background: rgba(255,255,255,.18); }
+  .count { font-size: .85rem; opacity: .7; margin-bottom: 10px; }
   .empty { opacity: .7; font-style: italic; padding: 8px 0; }
   ul { columns: 2; column-gap: 28px; padding-left: 18px; }
   @media (max-width: 560px) { ul { columns: 1; } }
-  li { margin: 4px 0; font-size: .92rem; }
-  li b { color: var(--gold); }
+  li { margin: 6px 0; font-size: .92rem; line-height: 1.45; break-inside: avoid; }
+  li b { color: var(--sand); }
+  li a { text-decoration: none; }
+
+  /* ---------- FOOTER ---------- */
+  .footer {
+    margin-top: 40px; text-align: center;
+    font-size: .85rem; color: var(--salvia); line-height: 1.6;
+    max-width: 560px;
+  }
+  .footer a { color: var(--sand); }
 </style>
 </head>
 <body>
-  <h1>🥾 Ruleta de Rutas de Cantabria</h1>
-  <div class="sub">Senderos fáciles y aptos para ir con niños · ¡Gira y a caminar!</div>
+  <header class="hero">
+    <div class="hero-art" aria-hidden="true"></div>
+    <div class="hero-content">
+      <p class="eyebrow">Cantabria · en familia</p>
+      <h1>Ruleta de <span class="accent">rutas</span> de senderismo</h1>
+      <p class="sub">62 senderos fáciles y aptos para ir con niños. Gira la ruleta y descubre vuestra próxima excursión 🥾</p>
+      <div class="badges">
+        <span class="badge">🥾 62 rutas</span>
+        <span class="badge">🚗 Cómo llegar</span>
+        <span class="badge">📍 Track en Wikiloc</span>
+      </div>
+    </div>
+  </header>
 
   <div class="wheel-wrap">
     <div class="pointer"></div>
@@ -198,6 +295,11 @@
     <div class="count" id="fCount"></div>
     <ul id="listEl"></ul>
   </details>
+
+  <footer class="footer">
+    Hecho con 🌲 para disfrutar Cantabria en familia.<br>
+    Distancias y desniveles orientativos · tracks reales en Wikiloc.
+  </footer>
 
 <script>
 // km, desnivel y tipo son ORIENTATIVOS (aprox.). El dato exacto está en el track de Wikiloc.
